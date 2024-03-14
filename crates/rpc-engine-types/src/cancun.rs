@@ -25,23 +25,39 @@ pub struct MaybeCancunPayloadFields {
 
 impl MaybeCancunPayloadFields {
     /// Returns a new `MaybeCancunPayloadFields` with no cancun fields.
+    #[inline]
     pub const fn none() -> Self {
         Self { fields: None }
     }
 
     /// Returns a new `MaybeCancunPayloadFields` with the given cancun fields.
+    #[inline]
     pub fn into_inner(self) -> Option<CancunPayloadFields> {
         self.fields
     }
 
     /// Returns the parent beacon block root, if any.
+    #[inline]
     pub fn parent_beacon_block_root(&self) -> Option<B256> {
         self.fields.as_ref().map(|fields| fields.parent_beacon_block_root)
     }
 
     /// Returns the blob versioned hashes, if any.
+    #[inline]
     pub fn versioned_hashes(&self) -> Option<&Vec<B256>> {
         self.fields.as_ref().map(|fields| &fields.versioned_hashes)
+    }
+
+    /// Returns `true` if the `MaybeCancunPayloadFields` contains no fields.
+    #[inline]
+    pub const fn is_none(&self) -> bool {
+        self.fields.is_none()
+    }
+
+    /// Returns `true` if the `MaybeCancunPayloadFields` contains fields.
+    #[inline]
+    pub const fn is_some(&self) -> bool {
+        self.fields.is_some()
     }
 }
 

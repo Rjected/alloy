@@ -626,6 +626,9 @@ pub enum PayloadError {
     /// Expected blob versioned hashes do not match the given transactions.
     #[error("expected blob versioned hashes do not match the given transactions")]
     InvalidVersionedHashes,
+    /// The cancun payload fields are not present post-cancun.
+    #[error("cancun payload fields are not present post-cancun")]
+    CancunFieldsMissing,
     /// Encountered decoding error.
     #[error(transparent)]
     Decode(#[from] alloy_rlp::Error),
