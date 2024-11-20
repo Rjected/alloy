@@ -95,6 +95,7 @@ ethereum_ssz = "0.8"
 c-kzg = { version = "1.0", default-features = false }
 elliptic-curve = { version = "0.13", default-features = false }
 k256 = { version = "0.13", default-features = false, features = ["ecdsa"] }
+signature = { version = "2.2", default-features = false }
 sha2 = { version = "0.10", default-features = false }
 spki = { version = "0.7", default-features = false }
 

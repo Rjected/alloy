@@ -25,6 +25,7 @@ alloy-primitives.workspace = true
 alloy-signer.workspace = true
 
 k256.workspace = true
+signature = { workspace = true, features = ["rand_core"] }
 rand.workspace = true
 thiserror.workspace = true
 async-trait.workspace = true

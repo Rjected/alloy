@@ -11,7 +11,8 @@ use alloy_network::{TxSigner, TxSignerSync};
 use alloy_primitives::{Address, ChainId, PrimitiveSignature as Signature, B256};
 use alloy_signer::{sign_transaction_with_chain_id, Result, Signer, SignerSync};
 use async_trait::async_trait;
-use k256::ecdsa::{self, signature::hazmat::PrehashSigner, RecoveryId};
+use k256::ecdsa::{self, RecoveryId};
+use signature::hazmat::RandomizedPrehashSigner;
 use std::fmt;
 
 mod error;
@@ -93,7 +94,9 @@ pub struct LocalSigner<C> {
 
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-impl<C: PrehashSigner<(ecdsa::Signature, RecoveryId)> + Send + Sync> Signer for LocalSigner<C> {
+impl<C: RandomizedPrehashSigner<(ecdsa::Signature, RecoveryId)> + Send + Sync> Signer
+    for LocalSigner<C>
+{
     #[inline]
     async fn sign_hash(&self, hash: &B256) -> Result<Signature> {
         self.sign_hash_sync(hash)
@@ -115,10 +118,10 @@ impl<C: PrehashSigner<(ecdsa::Signature, RecoveryId)> + Send + Sync> Signer for 
     }
 }
 
-impl<C: PrehashSigner<(ecdsa::Signature, RecoveryId)>> SignerSync for LocalSigner<C> {
+impl<C: RandomizedPrehashSigner<(ecdsa::Signature, RecoveryId)>> SignerSync for LocalSigner<C> {
     #[inline]
     fn sign_hash_sync(&self, hash: &B256) -> Result<Signature> {
-        Ok(self.credential.sign_prehash(hash.as_ref())?.into())
+        Ok(self.credential.sign_prehash_with_rng(&mut rand::thread_rng(), hash.as_ref())?.into())
     }
 
     #[inline]
@@ -127,7 +130,7 @@ impl<C: PrehashSigner<(ecdsa::Signature, RecoveryId)>> SignerSync for LocalSigne
     }
 }
 
-impl<C: PrehashSigner<(ecdsa::Signature, RecoveryId)>> LocalSigner<C> {
+impl<C: RandomizedPrehashSigner<(ecdsa::Signature, RecoveryId)>> LocalSigner<C> {
     /// Construct a new credential with an external [`PrehashSigner`].
     #[inline]
     pub const fn new_with_credential(
@@ -164,7 +167,7 @@ impl<C: PrehashSigner<(ecdsa::Signature, RecoveryId)>> LocalSigner<C> {
 }
 
 // do not log the signer
-impl<C: PrehashSigner<(ecdsa::Signature, RecoveryId)>> fmt::Debug for LocalSigner<C> {
+impl<C: RandomizedPrehashSigner<(ecdsa::Signature, RecoveryId)>> fmt::Debug for LocalSigner<C> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("LocalSigner")
             .field("address", &self.address)
@@ -177,7 +180,7 @@ impl<C: PrehashSigner<(ecdsa::Signature, RecoveryId)>> fmt::Debug for LocalSigne
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 impl<C> TxSigner<Signature> for LocalSigner<C>
 where
-    C: PrehashSigner<(ecdsa::Signature, RecoveryId)> + Send + Sync,
+    C: RandomizedPrehashSigner<(ecdsa::Signature, RecoveryId)> + Send + Sync,
 {
     fn address(&self) -> Address {
         self.address
@@ -194,7 +197,7 @@ where
 
 impl<C> TxSignerSync<Signature> for LocalSigner<C>
 where
-    C: PrehashSigner<(ecdsa::Signature, RecoveryId)>,
+    C: RandomizedPrehashSigner<(ecdsa::Signature, RecoveryId)>,
 {
     fn address(&self) -> Address {
         self.address
