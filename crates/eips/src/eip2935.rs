@@ -4,6 +4,10 @@
 
 use alloy_primitives::{address, bytes, Address, Bytes};
 
+/// The caller to be used when calling the EIP-2935 history storage contract at the end of the
+/// block.
+pub const SYSTEM_ADDRESS: Address = address!("fffffffffffffffffffffffffffffffffffffffe");
+
 /// The address for the EIP-2935 history storage contract.
 pub const HISTORY_STORAGE_ADDRESS: Address = address!("0aae40965e6800cd9b1f4b05ff21581047e3f91e");
 
